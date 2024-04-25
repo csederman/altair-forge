@@ -72,7 +72,7 @@ def get_df_coord(den: t.Dict[str, t.Any]) -> pd.DataFrame:
     return df_coord
 
 
-class ClusterHeatmapPlotter:
+class ClusterHeatmapBuilder:
 
     def __init__(
         self,
@@ -246,3 +246,22 @@ class ClusterHeatmapPlotter:
         drow = self._make_row_dendro(height=hm.height)
 
         return alt.vconcat(dcol, alt.hconcat(hm, drow, spacing=0), spacing=0)
+
+
+def cluster_heatmap(
+    data: pd.DataFrame,
+    na_frac: float = 0.2,
+    rect_height: float = 15,
+    rect_width: float = 15,
+    zero_center: bool = True,
+) -> alt.ConcatChart:
+    """"""
+    builder = ClusterHeatmapBuilder(
+        data=data,
+        na_frac=na_frac,
+        rect_height=rect_height,
+        rect_width=rect_width,
+        zero_center=zero_center,
+    )
+
+    return builder.plot()
