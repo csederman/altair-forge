@@ -1,1 +1,1 @@
-from .heatmap import HeatmapPlotter
+from .heatmap import ClusterHeatmapPlotter
