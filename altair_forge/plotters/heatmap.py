@@ -81,12 +81,16 @@ class ClusterHeatmapBuilder:
         rect_height: float = 15,
         rect_width: float = 15,
         zero_center: bool = True,
+        row_dendro_size: float = 40,
+        col_dendro_size: float = 40,
     ) -> None:
         self.data = data
         self.na_frac = na_frac
         self.rect_height = rect_height
         self.rect_width = rect_width
         self.zero_center = zero_center
+        self.row_dendro_size = row_dendro_size
+        self.col_dendro_size = col_dendro_size
 
         self.source, self.source_i = self._impute_missing_values()
 
@@ -191,7 +195,10 @@ class ClusterHeatmapBuilder:
         x_scale = alt.Scale(domain=(x_min, x_max), padding=self.rect_width / 2)
 
         base = alt.Chart(
-            df_coord, width=width, height=40, view=alt.ViewConfig(strokeOpacity=0)
+            df_coord,
+            width=width,
+            height=self.col_dendro_size,
+            view=alt.ViewConfig(strokeOpacity=0),
         )
 
         shoulder = base.mark_rule().encode(
@@ -222,7 +229,10 @@ class ClusterHeatmapBuilder:
         y_scale = alt.Scale(domain=(y_min, y_max), padding=self.rect_width / 2)
 
         base = alt.Chart(
-            df_coord, height=height, width=40, view=alt.ViewConfig(strokeOpacity=0)
+            df_coord,
+            height=height,
+            width=self.row_dendro_size,
+            view=alt.ViewConfig(strokeOpacity=0),
         )
 
         shoulder = base.mark_rule().encode(
@@ -258,6 +268,8 @@ def cluster_heatmap(
     rect_height: float = 15,
     rect_width: float = 15,
     zero_center: bool = True,
+    row_dendro_size: float = 40,
+    col_dendro_size: float = 40,
 ) -> alt.ConcatChart:
     """"""
     builder = ClusterHeatmapBuilder(
@@ -266,6 +278,8 @@ def cluster_heatmap(
         rect_height=rect_height,
         rect_width=rect_width,
         zero_center=zero_center,
+        row_dendro_size=row_dendro_size,
+        col_dendro_size=col_dendro_size,
     )
 
     return builder.plot()
