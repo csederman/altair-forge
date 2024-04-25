@@ -162,7 +162,7 @@ class ClusterHeatmapBuilder:
         z_scale = alt.Scale(domain=(z_min, z_mid, z_max), scheme="redyellowblue")
 
         hm_chart = (
-            alt.Chart(hm_data)
+            alt.Chart(hm_data, view=alt.ViewConfig(strokeOpacity=0))
             .mark_rect()
             .encode(
                 alt.X("col_var:O", sort=self.col_order_)
@@ -190,7 +190,9 @@ class ClusterHeatmapBuilder:
         x_max = df_coord[x_coord_cols].max().max()
         x_scale = alt.Scale(domain=(x_min, x_max), padding=self.rect_width / 2)
 
-        base = alt.Chart(df_coord, width=width, height=40)
+        base = alt.Chart(
+            df_coord, width=width, height=40, view=alt.ViewConfig(strokeOpacity=0)
+        )
 
         shoulder = base.mark_rule().encode(
             alt.X("xk2:Q", title=None, scale=x_scale).axis(
@@ -219,7 +221,9 @@ class ClusterHeatmapBuilder:
         y_max = df_coord[y_coord_cols].max().max()
         y_scale = alt.Scale(domain=(y_min, y_max), padding=self.rect_width / 2)
 
-        base = alt.Chart(df_coord, height=height, width=40)
+        base = alt.Chart(
+            df_coord, height=height, width=40, view=alt.ViewConfig(strokeOpacity=0)
+        )
 
         shoulder = base.mark_rule().encode(
             alt.Y("xk2:Q", title=None, scale=y_scale).axis(
@@ -227,7 +231,7 @@ class ClusterHeatmapBuilder:
             ),
             alt.Y2("xk3:Q"),
             alt.X("yk2:Q", title="").axis(
-                grid=False, labels=True, ticks=True, domainOpacity=0
+                grid=False, labels=False, ticks=False, domainOpacity=0
             ),
         )
         arm1 = base.mark_rule().encode(
