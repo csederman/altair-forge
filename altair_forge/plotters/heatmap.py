@@ -83,6 +83,7 @@ class ClusterHeatmapBuilder:
         zero_center: bool = True,
         row_dendro_size: float = 40,
         col_dendro_size: float = 40,
+        legend_title: str | None = None,
     ) -> None:
         self.data = data
         self.na_frac = na_frac
@@ -91,6 +92,7 @@ class ClusterHeatmapBuilder:
         self.zero_center = zero_center
         self.row_dendro_size = row_dendro_size
         self.col_dendro_size = col_dendro_size
+        self.legend_title = legend_title
 
         self.source, self.source_i = self._impute_missing_values()
 
@@ -175,7 +177,7 @@ class ClusterHeatmapBuilder:
                 alt.Y("row_var:O", sort=self.row_order_)
                 .axis(domainOpacity=0)
                 .title(None),
-                alt.Color("value:Q", scale=z_scale),
+                alt.Color("value:Q", scale=z_scale).legend(title=self.legend_title),
             )
             .properties(
                 height=self.rect_height * self.n_rows_,
@@ -270,6 +272,7 @@ def cluster_heatmap(
     zero_center: bool = True,
     row_dendro_size: float = 40,
     col_dendro_size: float = 40,
+    legend_title: str | None = None,
 ) -> alt.ConcatChart:
     """"""
     builder = ClusterHeatmapBuilder(
@@ -280,6 +283,7 @@ def cluster_heatmap(
         zero_center=zero_center,
         row_dendro_size=row_dendro_size,
         col_dendro_size=col_dendro_size,
+        legend_title=legend_title,
     )
 
     return builder.plot()
