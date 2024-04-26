@@ -191,9 +191,9 @@ class ClusterHeatmapBuilder:
                 alt.Y("row_var:O", sort=self.row_order_)
                 .axis(domainOpacity=0)
                 .title(None),
-                alt.Color("value:Q", scale=z_scale).legend(
-                    self.legend_config, title=self.legend_title
-                ),
+                alt.Color("value:Q", scale=z_scale)
+                .title(self.legend_title)
+                .legend(self.legend_config),
             )
             .properties(
                 height=self.rect_height_ * self.n_rows_,
