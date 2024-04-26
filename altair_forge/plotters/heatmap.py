@@ -77,22 +77,18 @@ class ClusterHeatmapBuilder:
     def __init__(
         self,
         data: pd.DataFrame,
-        height: float | None = None,
-        width: float | None = None,
         na_frac: float = 0.2,
-        rect_height: float | None = None,
-        rect_width: float | None = None,
+        height: int = 500,
+        width: int = 900,
         zero_center: bool = True,
         row_dendro_size: float = 40,
         col_dendro_size: float = 40,
         legend_title: str | None = None,
     ) -> None:
         self.data = data
+        self.na_frac = na_frac
         self.height = height
         self.width = width
-        self.na_frac = na_frac
-        self.rect_height = rect_height
-        self.rect_width = rect_width
         self.zero_center = zero_center
         self.row_dendro_size = row_dendro_size
         self.col_dendro_size = col_dendro_size
@@ -154,6 +150,14 @@ class ClusterHeatmapBuilder:
     def n_rows_(self) -> int:
         return len(self.row_order_)
 
+    @property
+    def rect_width_(self) -> float:
+        return self.width / self.n_cols_
+
+    @property
+    def rect_height_(self) -> float:
+        return self.height / self.n_rows_
+
     @staticmethod
     def _prepare_heatmap_data(data: pd.DataFrame) -> pd.DataFrame:
         """"""
@@ -183,19 +187,10 @@ class ClusterHeatmapBuilder:
                 .title(None),
                 alt.Color("value:Q", scale=z_scale).legend(title=self.legend_title),
             )
-        )
-
-        height = self.height
-        if self.rect_height is not None:
-            height = self.rect_height * self.n_rows_
-
-        width = self.width
-        if self.rect_width is not None:
-            width = self.rect_width * self.n_cols_
-
-        hm_chart = hm_chart.properties(
-            height=height,
-            width=width,
+            .properties(
+                height=self.rect_height_ * self.n_rows_,
+                width=self.rect_width_ * self.n_cols_,
+            )
         )
 
         return hm_chart
@@ -207,7 +202,7 @@ class ClusterHeatmapBuilder:
         x_coord_cols = ["xk1", "xk2", "xk3", "xk4"]
         x_min = df_coord[x_coord_cols].min().min()
         x_max = df_coord[x_coord_cols].max().max()
-        x_scale = alt.Scale(domain=(x_min, x_max), padding=self.rect_width / 2)
+        x_scale = alt.Scale(domain=(x_min, x_max), padding=self.rect_width_ / 2)
 
         base = alt.Chart(
             df_coord,
@@ -241,7 +236,7 @@ class ClusterHeatmapBuilder:
         y_coord_cols = ["xk1", "xk2", "xk3", "xk4"]
         y_min = df_coord[y_coord_cols].min().min()
         y_max = df_coord[y_coord_cols].max().max()
-        y_scale = alt.Scale(domain=(y_min, y_max), padding=self.rect_width / 2)
+        y_scale = alt.Scale(domain=(y_min, y_max), padding=self.rect_height_ / 2)
 
         base = alt.Chart(
             df_coord,
@@ -279,11 +274,9 @@ class ClusterHeatmapBuilder:
 
 def cluster_heatmap(
     data: pd.DataFrame,
-    height: float | None = None,
-    width: float | None = None,
     na_frac: float = 0.2,
-    rect_height: float = 15,
-    rect_width: float = 15,
+    height: float = 500,
+    width: float = 900,
     zero_center: bool = True,
     row_dendro_size: float = 40,
     col_dendro_size: float = 40,
@@ -292,11 +285,9 @@ def cluster_heatmap(
     """"""
     builder = ClusterHeatmapBuilder(
         data=data,
+        na_frac=na_frac,
         height=height,
         width=width,
-        na_frac=na_frac,
-        rect_height=rect_height,
-        rect_width=rect_width,
         zero_center=zero_center,
         row_dendro_size=row_dendro_size,
         col_dendro_size=col_dendro_size,
