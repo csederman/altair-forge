@@ -77,15 +77,19 @@ class ClusterHeatmapBuilder:
     def __init__(
         self,
         data: pd.DataFrame,
+        height: float | None = None,
+        width: float | None = None,
         na_frac: float = 0.2,
-        rect_height: float = 15,
-        rect_width: float = 15,
+        rect_height: float | None = None,
+        rect_width: float | None = None,
         zero_center: bool = True,
         row_dendro_size: float = 40,
         col_dendro_size: float = 40,
         legend_title: str | None = None,
     ) -> None:
         self.data = data
+        self.height = height
+        self.width = width
         self.na_frac = na_frac
         self.rect_height = rect_height
         self.rect_width = rect_width
@@ -179,10 +183,19 @@ class ClusterHeatmapBuilder:
                 .title(None),
                 alt.Color("value:Q", scale=z_scale).legend(title=self.legend_title),
             )
-            .properties(
-                height=self.rect_height * self.n_rows_,
-                width=self.rect_width * self.n_cols_,
-            )
+        )
+
+        height = self.height
+        if self.rect_height is not None:
+            height = self.rect_height * self.n_rows_
+
+        width = self.width
+        if self.rect_width is not None:
+            width = self.rect_width * self.n_cols_
+
+        hm_chart = hm_chart.properties(
+            height=height,
+            width=width,
         )
 
         return hm_chart
@@ -266,6 +279,8 @@ class ClusterHeatmapBuilder:
 
 def cluster_heatmap(
     data: pd.DataFrame,
+    height: float | None = None,
+    width: float | None = None,
     na_frac: float = 0.2,
     rect_height: float = 15,
     rect_width: float = 15,
@@ -277,6 +292,8 @@ def cluster_heatmap(
     """"""
     builder = ClusterHeatmapBuilder(
         data=data,
+        height=height,
+        width=width,
         na_frac=na_frac,
         rect_height=rect_height,
         rect_width=rect_width,
