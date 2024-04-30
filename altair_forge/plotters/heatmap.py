@@ -186,7 +186,7 @@ class ClusterHeatmapBuilder:
             .mark_rect()
             .encode(
                 alt.X("col_var:O", sort=self.col_order_)
-                .axis(domainOpacity=0, labelAngle=-45)
+                .axis(domainOpacity=0)
                 .title(None),
                 alt.Y("row_var:O", sort=self.row_order_)
                 .axis(domainOpacity=0)
