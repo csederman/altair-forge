@@ -305,3 +305,300 @@ def cluster_heatmap(
     )
 
     return builder.plot()
+
+
+# class ClusterHeatmapBuilder:
+
+#     def __init__(
+#         self,
+#         data: pd.DataFrame,
+#         na_frac: float = 0.2,
+#         height: int = 500,
+#         width: int = 900,
+#         zero_center: bool = True,
+#         row_dendro_size: float = 40,
+#         row_margin_data: pd.DataFrame | None = None,
+#         row_margin_scale: alt.Scale | None = None,
+#         col_dendro_size: float = 40,
+#         col_margin_data: pd.DataFrame | None = None,
+#         col_margin_scale: alt.Scale | None = None,
+#         legend_title: str | None = None,
+#         legend_config: alt.LegendConfig | None = None,
+#     ) -> None:
+#         self.data = data
+#         self.na_frac = na_frac
+#         self.height = height
+#         self.width = width
+#         self.zero_center = zero_center
+#         self.row_dendro_size = row_dendro_size
+#         self.row_margin_data = row_margin_data
+#         self.col_dendro_size = col_dendro_size
+#         self.col_margin_data = col_margin_data
+#         self.legend_title = legend_title
+
+#         self.row_margin_scale = (
+#             alt.Scale() if row_margin_scale is None else row_margin_scale
+#         )
+#         self.col_margin_scale = (
+#             alt.Scale() if col_margin_scale is None else col_margin_scale
+#         )
+
+#         if legend_config is None:
+#             legend_config = alt.LegendConfig()
+
+#         self.legend_config = legend_config
+
+#         self.source, self.source_i = self._impute_missing_values()
+
+#         self._get_col_dendro_data()
+#         self._get_row_dendro_data()
+
+#     def _impute_missing_values(self) -> t.Tuple[pd.DataFrame, pd.DataFrame]:
+#         """Impute missing values for clustering."""
+#         if not self.data.isnull().values.any():
+#             return self.data, self.data
+
+#         col_na_fracs = self.data.isnull().sum() / self.data.shape[0]
+#         keep_cols = col_na_fracs[col_na_fracs < self.na_frac].index
+#         source = self.data[keep_cols].copy()
+
+#         source_i = pd.DataFrame(
+#             KNNImputer(n_neighbors=3).fit_transform(source),
+#             index=source.index,
+#             columns=source.columns,
+#         )
+
+#         return source, source_i
+
+#     def _get_col_dendro_data(self) -> None:
+#         """Generate the dendrogram data for the columns."""
+#         agg_clust = AgglomerativeClustering(n_clusters=None, distance_threshold=0)
+#         _ = agg_clust.fit(self.source_i.T)
+
+#         L = extract_linkage_matrix(agg_clust)
+
+#         self.col_dendro_data_ = dendrogram(L, no_plot=True)
+
+#     def _get_row_dendro_data(self) -> None:
+#         """Generate the dendrogram data for the columns."""
+#         agg_clust = AgglomerativeClustering(n_clusters=None, distance_threshold=0)
+#         _ = agg_clust.fit(self.source_i)
+
+#         L = extract_linkage_matrix(agg_clust)
+
+#         self.row_dendro_data_ = dendrogram(L, no_plot=True)
+
+#     @property
+#     def col_order_(self) -> t.List[t.Any]:
+#         return list(self.source_i.columns[self.col_dendro_data_["leaves"]])
+
+#     @property
+#     def n_cols_(self) -> int:
+#         return len(self.col_order_)
+
+#     @property
+#     def row_order_(self) -> t.List[t.Any]:
+#         return list(reversed(self.source_i.index[self.row_dendro_data_["leaves"]]))
+
+#     @property
+#     def n_rows_(self) -> int:
+#         return len(self.row_order_)
+
+#     @property
+#     def rect_width_(self) -> float:
+#         return self.width / self.n_cols_
+
+#     @property
+#     def rect_height_(self) -> float:
+#         return self.height / self.n_rows_
+
+#     @property
+#     def _heatmap_x_axis(self) -> alt.Axis:
+#         """Generates the x-axis component."""
+#         axis_params = {"domainOpacity": 0}
+#         if self.col_margin_data is not None:
+#             axis_params.update({"labels": False, "ticks": False})
+#         return alt.Axis(**axis_params)
+
+#     @property
+#     def _heatmap_y_axis(self) -> alt.Axis:
+#         """Generates the x-axis component."""
+#         axis_params = {"domainOpacity": 0}
+#         if self.row_margin_data is not None:
+#             axis_params.update({"labels": False, "ticks": False})
+#         return alt.Axis(**axis_params)
+
+#     @staticmethod
+#     def _prepare_heatmap_data(data: pd.DataFrame) -> pd.DataFrame:
+#         """"""
+#         return (
+#             data.rename_axis(index="row_var", columns="col_var")
+#             .melt(ignore_index=False, value_name="value")
+#             .reset_index()
+#         )
+
+#     def _create_heatmap(self) -> alt.Chart:
+#         """"""
+#         hm_data = self._prepare_heatmap_data(self.source)
+
+#         z_min, z_max = get_domain(hm_data["value"])
+#         z_mid = 0 if self.zero_center else None
+#         z_scale = alt.Scale(domain=(z_min, z_mid, z_max), scheme="redyellowblue")
+
+#         hm_chart = (
+#             alt.Chart(hm_data, view=alt.ViewConfig(strokeOpacity=0))
+#             .mark_rect()
+#             .encode(
+#                 alt.X(
+#                     "col_var:O",
+#                     sort=self.col_order_,
+#                     axis=self._heatmap_x_axis,
+#                 ).title(None),
+#                 alt.Y(
+#                     "row_var:O",
+#                     sort=self.row_order_,
+#                     axis=self._heatmap_y_axis,
+#                 ).title(None),
+#                 alt.Color("value:Q", scale=z_scale)
+#                 .title(self.legend_title)
+#                 .legend(self.legend_config),
+#             )
+#             .properties(
+#                 height=self.rect_height_ * self.n_rows_,
+#                 width=self.rect_width_ * self.n_cols_,
+#             )
+#         )
+
+#         return hm_chart
+
+#     def _create_col_dendro(self, width: float) -> alt.LayerChart:
+#         """"""
+#         df_coord = get_df_coord(self.col_dendro_data_)
+
+#         x_coord_cols = ["xk1", "xk2", "xk3", "xk4"]
+#         x_min = df_coord[x_coord_cols].min().min()
+#         x_max = df_coord[x_coord_cols].max().max()
+#         x_scale = alt.Scale(domain=(x_min, x_max), padding=self.rect_width_ / 2)
+
+#         base = alt.Chart(
+#             df_coord,
+#             width=width,
+#             height=self.col_dendro_size,
+#             view=alt.ViewConfig(strokeOpacity=0),
+#         )
+
+#         shoulder = base.mark_rule().encode(
+#             alt.X("xk2:Q", title=None, scale=x_scale).axis(
+#                 grid=False, labels=False, ticks=False, domainOpacity=0
+#             ),
+#             alt.X2("xk3:Q"),
+#             alt.Y("yk2:Q", title=None).axis(
+#                 grid=False, labels=False, ticks=False, domainOpacity=0
+#             ),
+#         )
+#         arm1 = base.mark_rule().encode(
+#             alt.X("xk1:Q", scale=x_scale), alt.Y("yk1:Q"), alt.Y2("yk2:Q")
+#         )
+#         arm2 = base.mark_rule().encode(
+#             alt.X("xk3:Q", scale=x_scale), alt.Y("yk3:Q"), alt.Y2("yk4:Q")
+#         )
+
+#         return alt.layer(shoulder, arm1, arm2)
+
+#     def _create_row_dendro(self, height: float) -> alt.LayerChart:
+#         """"""
+#         df_coord = get_df_coord(self.row_dendro_data_)
+
+#         y_coord_cols = ["xk1", "xk2", "xk3", "xk4"]
+#         y_min = df_coord[y_coord_cols].min().min()
+#         y_max = df_coord[y_coord_cols].max().max()
+#         y_scale = alt.Scale(domain=(y_min, y_max), padding=self.rect_height_ / 2)
+
+#         base = alt.Chart(
+#             df_coord,
+#             height=height,
+#             width=self.row_dendro_size,
+#             view=alt.ViewConfig(strokeOpacity=0),
+#         )
+
+#         shoulder = base.mark_rule().encode(
+#             alt.Y("xk2:Q", title=None, scale=y_scale).axis(
+#                 grid=False, labels=False, ticks=False, domainOpacity=0
+#             ),
+#             alt.Y2("xk3:Q"),
+#             alt.X("yk2:Q", title="").axis(
+#                 grid=False, labels=False, ticks=False, domainOpacity=0
+#             ),
+#         )
+#         arm1 = base.mark_rule().encode(
+#             alt.Y("xk1:Q", scale=y_scale), alt.X("yk1:Q"), alt.X2("yk2:Q")
+#         )
+#         arm2 = base.mark_rule().encode(
+#             alt.Y("xk3:Q", scale=y_scale), alt.X("yk3:Q"), alt.X2("yk4:Q")
+#         )
+
+#         return alt.layer(shoulder, arm1, arm2)
+
+#     def plot(self) -> alt.ConcatChart:
+#         """"""
+#         hm = self._create_heatmap()
+#         col_dendro = self._create_col_dendro(width=hm.width)
+#         row_dendro = self._create_row_dendro(height=hm.height)
+
+#         if self.col_margin_data is not None:
+#             n_col_categories = self.col_margin_data["y"].nunique()
+
+#             col_hmap = (
+#                 alt.Chart(self.col_margin_data)
+#                 .mark_rect()
+#                 .encode(
+#                     alt.X("x:N", sort=self.col_order_).axis(domainOpacity=0),
+#                     alt.Y("y:N"),
+#                     alt.Color("value:N", scale=self.col_margin_scale),
+#                 )
+#                 .properties(
+#                     width=self.rect_width_ * self.n_cols_,
+#                     height=self.rect_height_ * n_col_categories,
+#                 )
+#             )
+
+#             return alt.vconcat(
+#                 col_dendro, alt.hconcat(hm, row_dendro, spacing=0), col_hmap, spacing=0
+#             )
+
+#         return alt.vconcat(
+#             col_dendro, alt.hconcat(hm, row_dendro, spacing=0), spacing=0
+#         )
+
+
+# def cluster_heatmap(
+#     data: pd.DataFrame,
+#     na_frac: float = 0.2,
+#     height: float = 500,
+#     width: float = 900,
+#     zero_center: bool = True,
+#     row_dendro_size: float = 40,
+#     row_margin_data: pd.DataFrame | None = None,
+#     col_dendro_size: float = 40,
+#     col_margin_data: pd.DataFrame | None = None,
+#     col_margin_scale: alt.Scale | None = None,
+#     legend_title: str | None = None,
+#     legend_config: alt.LegendConfig | None = None,
+# ) -> alt.ConcatChart:
+#     """"""
+#     builder = ClusterHeatmapBuilder(
+#         data=data,
+#         na_frac=na_frac,
+#         height=height,
+#         width=width,
+#         zero_center=zero_center,
+#         row_dendro_size=row_dendro_size,
+#         row_margin_data=row_margin_data,
+#         col_dendro_size=col_dendro_size,
+#         col_margin_data=col_margin_data,
+#         col_margin_scale=col_margin_scale,
+#         legend_title=legend_title,
+#         legend_config=legend_config,
+#     )
+
+#     return builder.plot()
