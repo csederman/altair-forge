@@ -83,6 +83,7 @@ class ClusterHeatmapBuilder:
         zero_center: bool = True,
         legend_title: str | None = None,
         legend_config: alt.LegendConfig | None = None,
+        legend_spacing: int = 10,
         row_dendro_size: float = 40,
         row_margin_data: pd.DataFrame | None = None,
         row_margin_x_scale: alt.Scale | None = None,
@@ -109,6 +110,7 @@ class ClusterHeatmapBuilder:
 
         self.legend_config = legend_config
         self.legend_title = legend_title
+        self.legend_spacing = legend_spacing
 
         self.row_dendro_size = row_dendro_size
         self.row_margin_data = row_margin_data
@@ -511,7 +513,7 @@ class ClusterHeatmapBuilder:
             legends.insert(1, col_margin_legend)
 
         if len(legends) > 0:
-            legend = alt.vconcat(*legends, spacing=10)
+            legend = alt.vconcat(*legends, spacing=self.legend_spacing)
 
         return alt.hconcat(chart, legend)
 
@@ -538,6 +540,7 @@ def cluster_heatmap(
     col_margin_legend_config: alt.LegendConfig | None = None,
     legend_title: str | None = None,
     legend_config: alt.LegendConfig | None = None,
+    legend_spacing: int = 10,
 ) -> alt.ConcatChart:
     """"""
     builder = ClusterHeatmapBuilder(
@@ -562,6 +565,7 @@ def cluster_heatmap(
         col_margin_legend_config=col_margin_legend_config,
         legend_title=legend_title,
         legend_config=legend_config,
+        legend_spacing=legend_spacing,
     )
 
     return builder.plot()
