@@ -85,12 +85,16 @@ class ClusterHeatmapBuilder:
         legend_config: alt.LegendConfig | None = None,
         row_dendro_size: float = 40,
         row_margin_data: pd.DataFrame | None = None,
-        row_margin_scale: alt.Scale | None = None,
+        row_margin_x_scale: alt.Scale | None = None,
+        row_margin_y_scale: alt.Scale | None = None,
+        row_margin_z_scale: alt.Scale | None = None,
         row_margin_legend_title: str | None = None,
         row_margin_legend_config: alt.LegendConfig | None = None,
         col_dendro_size: float = 40,
         col_margin_data: pd.DataFrame | None = None,
-        col_margin_scale: alt.Scale | None = None,
+        col_margin_x_scale: alt.Scale | None = None,
+        col_margin_y_scale: alt.Scale | None = None,
+        col_margin_z_scale: alt.Scale | None = None,
         col_margin_legend_title: str | None = None,
         col_margin_legend_config: alt.LegendConfig | None = None,
     ) -> None:
@@ -108,8 +112,14 @@ class ClusterHeatmapBuilder:
 
         self.row_dendro_size = row_dendro_size
         self.row_margin_data = row_margin_data
-        self.row_margin_scale = (
-            alt.Scale() if row_margin_scale is None else row_margin_scale
+        self.row_margin_x_scale = (
+            alt.Scale() if row_margin_x_scale is None else row_margin_x_scale
+        )
+        self.row_margin_y_scale = (
+            alt.Scale() if row_margin_y_scale is None else row_margin_y_scale
+        )
+        self.row_margin_z_scale = (
+            alt.Scale() if row_margin_z_scale is None else row_margin_z_scale
         )
         self.row_margin_legend_title = row_margin_legend_title
         self.row_margin_legend_config = (
@@ -120,8 +130,14 @@ class ClusterHeatmapBuilder:
 
         self.col_dendro_size = col_dendro_size
         self.col_margin_data = col_margin_data
-        self.col_margin_scale = (
-            alt.Scale() if col_margin_scale is None else col_margin_scale
+        self.col_margin_x_scale = (
+            alt.Scale() if col_margin_x_scale is None else col_margin_x_scale
+        )
+        self.col_margin_y_scale = (
+            alt.Scale() if col_margin_y_scale is None else col_margin_y_scale
+        )
+        self.col_margin_z_scale = (
+            alt.Scale() if col_margin_z_scale is None else col_margin_z_scale
         )
         self.col_margin_legend_title = col_margin_legend_title
         self.col_margin_legend_config = (
@@ -398,9 +414,15 @@ class ClusterHeatmapBuilder:
             )
             .mark_rect(stroke="black")
             .encode(
-                alt.X("x:N", sort=self.col_order_).axis(domainOpacity=0).title(None),
-                alt.Y("y:N").axis(domainOpacity=0, orient="right").title(None),
-                alt.Color("value:N", scale=self.col_margin_scale).legend(None),
+                alt.X("x:N", sort=self.col_order_)
+                .axis(domainOpacity=0)
+                .scale(self.col_margin_x_scale)
+                .title(None),
+                alt.Y("y:N")
+                .axis(domainOpacity=0, orient="right")
+                .scale(self.col_margin_y_scale)
+                .title(None),
+                alt.Color("value:N", scale=self.col_margin_z_scale).legend(None),
             )
         )
 
@@ -417,7 +439,7 @@ class ClusterHeatmapBuilder:
             .mark_rect(size=0)
             .encode(
                 alt.Color("value:N")
-                .scale(self.col_margin_scale)
+                .scale(self.col_margin_z_scale)
                 .legend(self.col_margin_legend_config)
                 .title(self.col_margin_legend_title)
             )
@@ -438,11 +460,12 @@ class ClusterHeatmapBuilder:
             )
             .mark_rect(stroke="black")
             .encode(
-                alt.X("x:N").axis(None).title(None),
+                alt.X("x:N").scale(self.row_margin_x_scale).axis(None).title(None),
                 alt.Y("y:N", sort=self.row_order_)
+                .scale(self.row_margin_y_scale)
                 .axis(domainOpacity=0, orient="right")
                 .title(None),
-                alt.Color("value:N").scale(self.row_margin_scale).legend(None),
+                alt.Color("value:N").scale(self.row_margin_z_scale).legend(None),
             )
         )
 
@@ -456,7 +479,7 @@ class ClusterHeatmapBuilder:
             .mark_rect(size=0)
             .encode(
                 alt.Color("value:N")
-                .scale(self.row_margin_scale)
+                .scale(self.row_margin_z_scale)
                 .legend(self.row_margin_legend_config)
                 .title(self.row_margin_legend_title)
             )
@@ -501,12 +524,16 @@ def cluster_heatmap(
     zero_center: bool = True,
     row_dendro_size: float = 40,
     row_margin_data: pd.DataFrame | None = None,
-    row_margin_scale: alt.Scale | None = None,
+    row_margin_x_scale: alt.Scale | None = None,
+    row_margin_y_scale: alt.Scale | None = None,
+    row_margin_z_scale: alt.Scale | None = None,
     row_margin_legend_title: str | None = None,
     row_margin_legend_config: alt.LegendConfig | None = None,
     col_dendro_size: float = 40,
     col_margin_data: pd.DataFrame | None = None,
-    col_margin_scale: alt.Scale | None = None,
+    col_margin_x_scale: alt.Scale | None = None,
+    col_margin_y_scale: alt.Scale | None = None,
+    col_margin_z_scale: alt.Scale | None = None,
     col_margin_legend_title: str | None = None,
     col_margin_legend_config: alt.LegendConfig | None = None,
     legend_title: str | None = None,
@@ -521,12 +548,16 @@ def cluster_heatmap(
         zero_center=zero_center,
         row_dendro_size=row_dendro_size,
         row_margin_data=row_margin_data,
-        row_margin_scale=row_margin_scale,
+        row_margin_x_scale=row_margin_x_scale,
+        row_margin_y_scale=row_margin_y_scale,
+        row_margin_z_scale=row_margin_z_scale,
         row_margin_legend_title=row_margin_legend_title,
         row_margin_legend_config=row_margin_legend_config,
         col_dendro_size=col_dendro_size,
         col_margin_data=col_margin_data,
-        col_margin_scale=col_margin_scale,
+        col_margin_x_scale=col_margin_x_scale,
+        col_margin_y_scale=col_margin_y_scale,
+        col_margin_z_scale=col_margin_z_scale,
         col_margin_legend_title=col_margin_legend_title,
         col_margin_legend_config=col_margin_legend_config,
         legend_title=legend_title,
