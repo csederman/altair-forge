@@ -495,7 +495,7 @@ class ClusterHeatmapBuilder:
         col_dendro = self._create_col_dendro(width=hm.width)
         row_dendro = self._create_row_dendro(height=hm.height)
 
-        legends = [alt.vconcat(self._create_dendro_spacer(), legend, spacing=0)]
+        legends = [legend]
 
         row_1 = col_dendro
         row_2 = alt.hconcat(row_dendro, hm, spacing=0)
